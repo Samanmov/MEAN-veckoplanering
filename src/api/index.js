@@ -5,10 +5,11 @@ var Week = require('../models/week'); // eller vad vår model-fil heter
 
 var router = express.Router();
 
-//router.get...
+//show the week
 router.get('/', function (req, res) {
-	// hämta ifrån mongoose
-  //var car = mongoose.model('Week', weekSchema);	
+	console.log("hit?");
+	// upload from mongoose
+  //var Week = mongoose.model('Week', weekSchema);	
   Week.find(function(err, weeks){
   	if(err){
   		return console.error('Error' + err);
@@ -19,28 +20,67 @@ router.get('/', function (req, res) {
   });
 });
 
-router.get('/search/:s', function(req, res){
-	var search = req.params.s;
-	console.log(s);
-	Week.find(function(err, weeks){
+
+// create the new week
+router.post('/', function (req, res) {
+	console.log(req.body);
+	Week.create(req.body, function(err, newDoc){
+	if(err) {
+		return console.error('Error:' + err);
+	} else {
+		
+	}
+	});
+	
+});
+
+// delete the week
+// find the id of weekly planning
+router.delete('/:id', function (req, res){
+	//console.log(req);
+	var id = req.params.id;
+	Week.findByIdAndRemove(id, function(err, result){
 		if(err){
-			return console.error('Error' + err)
-		} else {
-			res.json({'weeks':weeks});
+			res.status(500).json({ err: err.message });
 		}
+		//res.json({ message: 'Car Deleted' });
+		console.log('Deleted!');
 	});
 });
 
+//update the week
+router.put('/:id', function (req, res){
+	console.log("ssupdate");
+	var id = req.params.id;
+	var week = req.body;
+	if(week && week._id !==id){
+		return res.status(500).json({ err: "Ids don't match"});
+	}
+	Week.findByIdAndUpdate(id, week, {new: true}, function(err, week){
+		if (err) {
+			return res.status(500).json({ err: err.message });
+		}
+		res.json({'week' : week, message:'Car Updated'})
+	});
+});
+
+// search the CourseInfo
+router.get('/search/:id', function (req, res) {
+	var search  = req.params.id;
+	console.log("hit?");
+	// hämta ifrån mongoose
+  //var week = mongoose.model('Week', weekSchema);	
+  Week.findOne({ CourseInfo: search }, function(err, weeks){
+  	if(err){
+  		return console.error('Error' + err);
+  	} else {
+  		//console.log('Weeks:'+weeks);
+ 		res.json({'weeks':weeks});
+  	}
+  });
+});
 
 
-
-
-
-//router.post...
-
-//router.put...
-
-//router.delete...
 
 module.exports = router;
 
